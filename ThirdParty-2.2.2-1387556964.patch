@@ -1,0 +1,76 @@
+diff --git a/Allwmake b/Allwmake
+--- a/Allwmake
++++ b/Allwmake
+@@ -52,6 +52,13 @@
+ [ -n "$WM_CXXFLAGS" ]   &&  export CXXFLAGS="$WM_CXXFLAGS"
+ [ -n "$WM_LDFLAGS" ]    &&  export LDFLAGS="$WM_LDFLAGS"
+ 
++if [ "$WM_ARCH_BASE" == "darwin" ]
++then
++    export WM_SO_EXTENSION=dylib
++else
++    export WM_SO_EXTENSION=so
++fi
++
+ echo
+ echo ========================================
+ echo Start ThirdParty Allwmake
+@@ -187,10 +194,14 @@
+ 
+ # this needs generalizing
+ scotchMakefile=../../etc/wmakeFiles/scotch/Makefile.inc.i686_pc_linux2.shlib-OpenFOAM-$WM_ARCH_OPTION
++if [ "$WM_ARCH_BASE" == "darwin" ]
++then
++    scotchMakefile=../../etc/wmakeFiles/scotch/Makefile.inc.i686_mac_darwin.shlib-OpenFOAM
++fi
+ 
+ if [ -f $SCOTCH_ARCH_PATH/include/scotch.h \
+-  -a -r $FOAM_EXT_LIBBIN/libscotch.so \
+-  -a -r $FOAM_EXT_LIBBIN/libscotcherrexit.so ]
++  -a -r $FOAM_EXT_LIBBIN/libscotch.$WM_SO_EXTENSION \
++  -a -r $FOAM_EXT_LIBBIN/libscotcherrexit.$WM_SO_EXTENSION ]
+ then
+     echo "    scotch header in $SCOTCH_ARCH_PATH/include"
+     echo "    scotch libs   in $FOAM_EXT_LIBBIN"
+@@ -250,8 +261,8 @@
+     echo
+ 
+     if [ -f $SCOTCH_ARCH_PATH/include/$FOAM_MPI/ptscotch.h \
+-      -a -r $FOAM_EXT_LIBBIN/$FOAM_MPI/libptscotch.so \
+-      -a -r $FOAM_EXT_LIBBIN/$FOAM_MPI/libptscotcherrexit.so ]
++      -a -r $FOAM_EXT_LIBBIN/$FOAM_MPI/libptscotch.$WM_SO_EXTENSION \
++      -a -r $FOAM_EXT_LIBBIN/$FOAM_MPI/libptscotcherrexit.$WM_SO_EXTENSION ]
+     then
+         echo "    ptscotch header in $SCOTCH_ARCH_PATH/include/$FOAM_MPI"
+         echo "    ptscotch libs   in $FOAM_EXT_LIBBIN/$FOAM_MPI"
+@@ -330,3 +341,4 @@
+ 
+ 
+ # ----------------------------------------------------------------- end-of-file
++# vim:et:sw=4:ts=4
+diff --git a/etc/wmakeFiles/scotch/Makefile.inc.i686_mac_darwin.shlib-OpenFOAM b/etc/wmakeFiles/scotch/Makefile.inc.i686_mac_darwin.shlib-OpenFOAM
+new file mode 100644
+--- /dev/null
++++ b/etc/wmakeFiles/scotch/Makefile.inc.i686_mac_darwin.shlib-OpenFOAM
+@@ -0,0 +1,21 @@
++EXE		=
++LIB		= .dylib
++OBJ		= .o
++
++MAKE		= make
++AR		= $(WM_CC)
++ARFLAGS		= -dynamiclib -undefined dynamic_lookup -o
++CAT		= cat
++CCS		= clang
++CCP		= mpicc
++CCD		= mpicc
++CFLAGS		= -O3 -DCOMMON_FILE_COMPRESS_GZ -DCOMMON_RANDOM_FIXED_SEED -DSCOTCH_RENAME -DSCOTCH_RENAME_PARSER -Drestrict=__restrict -DCOMMON_TIMING_OLD
++CLIBFLAGS	= -fPIC
++LDFLAGS		= -lz -lm
++CP		= cp
++LEX		= flex -Pscotchyy -olex.yy.c
++LN		= ln
++MKDIR		= mkdir
++MV		= mv
++RANLIB		= echo
++YACC		= bison -pscotchyy -y -b y
